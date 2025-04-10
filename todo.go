@@ -4,8 +4,8 @@ import "fmt"
 
 type TodoList struct {
 	Id          int    `json:"id" db:"id"`
-	Title       string `json:"title" db:"title" binding:"required"`
-	Description string `json:"description" db:"description"`
+	Title       string `json:"title" db:"title" binding:"required" example:"Buy groceries"`
+	Description string `json:"description" db:"description" example:"Milk, Bread, Eggs"`
 }
 
 type UsersList struct {
@@ -16,9 +16,9 @@ type UsersList struct {
 
 type TodoItem struct {
 	Id          int    `json:"id" db:"id"`
-	Title       string `json:"title" db:"title" binding:"required"`
-	Description string `json:"description" db:"description"`
-	Done        bool   `json:"done" db:"done"`
+	Title       string `json:"title" db:"title" binding:"required" example:"Item title"`
+	Description string `json:"description" db:"description" example:"Item description"`
+	Done        bool   `json:"done" db:"done" example:"false"`
 }
 
 type ListsItem struct {
@@ -28,8 +28,8 @@ type ListsItem struct {
 }
 
 type UpdateListInput struct {
-	Title       *string `json:"title"`
-	Description *string `json:"description"`
+	Title       *string `json:"title" example:"list update"`
+	Description *string `json:"description" example:"update description"`
 }
 
 func (i UpdateListInput) Validate() error {
@@ -40,9 +40,9 @@ func (i UpdateListInput) Validate() error {
 }
 
 type UpdateItemInput struct {
-	Title       *string `json:"title"`
-	Description *string `json:"description"`
-	Done        *bool   `json:"done"`
+	Title       *string `json:"title" example:"item update"`
+	Description *string `json:"description" example:"update description"`
+	Done        *bool   `json:"done" example:"false"`
 }
 
 func (i UpdateItemInput) Validate() error {
