@@ -28,7 +28,7 @@ func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 		tx.Rollback()
 		return 0, err
 	}
-	createUsersListQuery := fmt.Sprintf("INSERT INTO %s (user_id, list_id) values ($1, $2) RETURNING id", usersListTable)
+	createUsersListQuery := fmt.Sprintf("INSERT INTO %s (user_id, list_id) values ($1, $2) RETURNING id", usersListsTable)
 	_, err = tx.Exec(createUsersListQuery, userId, id)
 	if err != nil {
 		tx.Rollback()
@@ -40,8 +40,11 @@ func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 
 func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
 	var lists []todo.TodoList
-	query := fmt.Sprintf("select tl.id, tl.title, tl.description from %s tl inner join %s ul on tl.id = ul.list_id where ul.user_id = $1", todoListsTable, usersListTable)
+	query := fmt.Sprintf("select tl.id, tl.title, tl.description from %s tl inner join %s ul on tl.id = ul.list_id where ul.user_id = $1", todoListsTable, usersListsTable)
 	err := r.db.Select(&lists, query, userId)
+	if err != nil {
+		logrus.Error(err)
+	}
 	return lists, err
 }
 
@@ -49,14 +52,14 @@ func (r *TodoListPostgres) GetById(userId, listId int) (todo.TodoList, error) {
 	var list todo.TodoList
 
 	query := fmt.Sprintf("select tl.id, tl.title, tl.description from %s tl inner join %s ul on tl.id = ul.list_id where ul.user_id = $1 and ul.list_id = $2",
-		todoListsTable, usersListTable)
+		todoListsTable, usersListsTable)
 	err := r.db.Get(&list, query, userId, listId)
 	return list, err
 }
 
 func (r *TodoListPostgres) Delete(userId, listId int) error {
 	query := fmt.Sprintf("delete from %s tl using %s  ul where tl.id = ul.list_id and ul.user_id = $1 and ul.list_id = $2",
-		todoListsTable, usersListTable)
+		todoListsTable, usersListsTable)
 	_, err := r.db.Exec(query, userId, listId)
 	return err
 }
@@ -78,7 +81,7 @@ func (r *TodoListPostgres) Update(userId, listId int, input todo.UpdateListInput
 	}
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf("UPDATE %s tl set %s from %s ul where tl.id = ul.list_id and ul.user_id = $%d and ul.list_id = $%d",
-		todoListsTable, setQuery, usersListTable, argId, argId+1)
+		todoListsTable, setQuery, usersListsTable, argId, argId+1)
 	args = append(args, userId, listId)
 	logrus.Debugf("updateQuery %s", query)
 	logrus.Debugf("args %s", args)
